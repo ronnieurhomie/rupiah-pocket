@@ -53,13 +53,26 @@ Both browsers also completed a worker-upgrade test: enter `50` in a controlled v
 
 The source repository was initially private and was subsequently made public at the owner's request. The source and its three existing commits were reviewed for credential patterns before that change; no API keys, OAuth tokens, or private keys were found. No credentials are needed by the app.
 
-## Method and limits
+## Physical iPhone verification — owner-reported
+
+**Date:** 2026-11-16. **Result:** Passed for offline reopening and currency conversion in the installed Home Screen app at **https://rupiah-pocket.pages.dev/**.
+
+The owner reported completing the following steps on a physical iPhone:
+
+1. Enable Airplane Mode.
+2. Turn off Wi-Fi.
+3. Close the installed app and reopen it from the Home Screen.
+4. Confirm that currency conversion still works normally while offline.
+
+This is a real-device result reported by the owner, rather than an assistant-observed test or desktop simulation. The iPhone model and iOS version were not recorded. The report confirms that the installed app can reopen and calculate without connectivity; it does not independently verify the exact saved-rate values or offline status text.
+
+## Method and remaining limits
 
 The isolated browser tests used the same app source with only the rate URLs redirected to local fixtures and worker-version markers added for the upgrade scenario. The offline test actually disabled responses from the test source and separately simulated `navigator.onLine=false` to verify its status message. Test injections were not published to production.
 
-**No physical iPhone testing was performed by the maintainer's assistant.** macOS Safari was tested, but iOS browser-toolbar behavior, actual gesture-bar insets, installed standalone mode, native keyboard presentation, and OS storage retention still require an iPhone check. Desktop safe-area and viewport simulations do not constitute physical-device verification.
+The owner-reported iPhone test above supplements the assistant's macOS Safari and Chromium checks. Actual iOS toolbar and gesture-bar behavior, native keyboard presentation, long-term storage retention, rate refresh after reconnection, and app upgrades on a physical iPhone have not been established by that report. Desktop safe-area and viewport simulations remain separate from physical-device verification.
 
-For the owner's device check, launch the installed Home Screen app online first, record a calculation and source date, enable Airplane Mode with Wi-Fi off, close and reopen the app, and repeat the calculation. Restore connectivity afterward. The README contains the full checklist.
+The README retains a repeatable offline checklist, including saved-result comparison and restoration of connectivity, for future device checks.
 
 ## Operating profile
 

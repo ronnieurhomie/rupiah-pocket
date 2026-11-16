@@ -141,7 +141,9 @@ Official deployment references: [Cloudflare Git integration](https://developers.
 
 Entered prices and saved rates stay in the browser. The app has no account system, analytics, telemetry, voice recognition, or AI integration. Online rate requests go directly from the browser to the exchange-rate providers, and static files are served by Cloudflare Pages.
 
-Amount/keypad checks, the requested phone-size layouts, desktop Safari/Chromium interactions, offline reopening, and service-worker upgrades have been verified. **No physical iPhone testing has been performed by the maintainer's assistant.** Safe areas, standalone dimensions, and keyboard-height changes were simulated on desktop browsers; see [VERIFICATION.md](VERIFICATION.md) for scope and evidence.
+Amount/keypad checks, the requested phone-size layouts, desktop Safari/Chromium interactions, offline reopening, and service-worker upgrades have been verified.
+
+**Physical iPhone offline test passed — owner-reported on 2026-11-16.** The owner enabled Airplane Mode, turned off Wi-Fi, closed the installed Home Screen app, and reopened it. Currency conversion continued to work offline. This result confirms offline reopening and conversion on the owner's iPhone; other device-specific checks remain separate. See [VERIFICATION.md](VERIFICATION.md) for the test scope and remaining limits.
 
 <details>
 <summary>Production layout capture</summary>
