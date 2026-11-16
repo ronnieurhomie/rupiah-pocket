@@ -57,7 +57,9 @@ This is a physical-device result reported by the owner, rather than an assistant
 
 ## Production and installation
 
-The production URL is **https://rupiah-pocket.pages.dev/**. The public GitHub repository is connected to Cloudflare Pages; pushes to `main` deploy automatically. Production checks compare deployed app assets against the reviewed source and check the manifest, icons, service-worker headers, and live rate endpoint.
+The production URL is **https://rupiah-pocket.pages.dev/**. The public GitHub repository is connected to Cloudflare Pages; pushes to `main` deploy automatically. The v3 production release was verified at runtime commit `5718e02`: HTML, CSS, all three JavaScript modules, the service worker, manifest, and three icons returned HTTP 200 and matched the reviewed source byte-for-byte. The manifest MIME type and `sw.js` no-cache header were correct. The live primary and fallback endpoints parsed successfully; their datasets supplied 165 and 286 valid three-letter target codes respectively at the time of the check.
+
+The existing macOS Safari session received the corrected shell after reloading, without removing its installed data. The production app also opened in Chromium; EUR/JPY/GBP choices survived a page reload, and a 390 × 844 view fit without scrolling. The live daily dataset displayed 175,500 IDR as EUR 8.73 / JPY 1,539 / GBP 7.29 during the check.
 
 The manifest retains the same app ID, start URL, and scope. Its display name and language are now English. Actual icon dimensions remain **192 × 192**, **512 × 512**, and **180 × 180** for the Apple touch icon. Updating an existing app normally requires an online launch/foreground visit, rather than removing its Home Screen icon.
 
@@ -69,4 +71,4 @@ Isolated browser tests use the app source with rate URLs redirected to local fix
 
 ## Operating profile
 
-Static Cloudflare Pages deployment with no backend functions, paid exchange-rate API, or AI model. The complete supported currency dataset is fetched in one request per due refresh, with no request for each key press or currency selection. Failed refreshes retain saved data, and an older fallback dataset does not replace a newer saved dataset. The documentation screenshot is not precached by the app.
+Static Cloudflare Pages deployment with no backend functions, paid exchange-rate API, or AI model. Core app assets and icons total approximately 40 KB before compression. The complete supported currency dataset is fetched in one request per due refresh, with no request for each key press or currency selection. Failed refreshes retain saved data, and an older fallback dataset does not replace a newer saved dataset. The documentation screenshot is not precached by the app.
