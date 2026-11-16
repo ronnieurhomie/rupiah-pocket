@@ -1,26 +1,132 @@
-:root{color-scheme:light;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#183b32;background:#f5f6f2;font-synthesis:none}*{box-sizing:border-box}body{margin:0}button,input{font:inherit;color:inherit}button{border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}button:focus-visible,input:focus-visible{outline:2px solid #537b67;outline-offset:3px}button:active{background:#183b32;color:#fff}svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.calculator{max-width:440px;margin:auto;height:100vh;height:100svh;height:100dvh;min-height:440px;display:flex;flex-direction:column;padding:max(env(safe-area-inset-top),12px) max(env(safe-area-inset-right),16px) max(env(safe-area-inset-bottom),16px) max(env(safe-area-inset-left),16px);gap:10px}.reader{margin-top:clamp(24px,12svh,104px);flex-shrink:0}.results{display:grid;grid-template-columns:repeat(var(--currency-count,3),minmax(0,1fr));gap:8px;padding:0 0 14px;text-align:center}.currency-label{display:flex;align-items:center;justify-content:center;gap:5px;min-height:44px;width:100%;background:transparent;border-radius:10px;font-size:12px;color:#526d5c}.currency-label span{font-size:14px}.currency-label:active{background:#e5ecdf;color:#183b32}.results output{font-size:clamp(21px,6vw,27px);font-weight:650;font-variant-numeric:tabular-nums;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.5px}.amount{background:#e5ecdf;border-radius:20px;padding:6px 16px}.amount-top,.amount-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}.amount label{font-size:12px;color:#64796c}.amount button{background:transparent;min-width:44px;min-height:44px;padding:8px;border-radius:12px;font-size:12px}.amount button:active{background:#d2ddcb;color:#183b32}#amt{display:block;width:100%;border:0;background:transparent;padding:0;outline:0;font-size:36px;font-weight:650;line-height:1.25;font-variant-numeric:tabular-nums}#amt::placeholder{color:#183b32;opacity:1}.amount-bottom{font-size:14px;font-variant-numeric:tabular-nums}#full{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.spacer{flex:1;min-height:12px}footer{flex-shrink:0;color:#6b7d71;text-align:center;font-size:10px;line-height:1.5}footer a{color:inherit;text-underline-offset:2px}.keypad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;flex-shrink:0}.keypad button{height:clamp(44px,8svh,68px);background:#e7ebe3;border-radius:14px;font-size:27px;font-weight:500;font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:center}.keypad button:active{background:#183b32;color:#fff}.native-mode .keypad{display:none}.native-mode .reader{margin-top:24px}.native-mode .spacer{min-height:4px;flex:0}.error{color:#a33b30}@media(max-height:680px){.calculator{gap:6px}.reader{margin-top:16px}.results{padding-bottom:10px}.amount{padding-top:2px;padding-bottom:2px}#amt{font-size:32px}.keypad{gap:6px}.keypad button{border-radius:11px}.spacer{min-height:8px}}@media(max-height:460px) and (orientation:landscape){.calculator{max-width:760px;min-height:280px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr auto;gap:10px 24px}.reader{margin-top:12px;grid-column:1;grid-row:1}.spacer{display:none}footer{grid-column:1;grid-row:2}.keypad{grid-column:2;grid-row:1 / 3;align-self:center}.keypad button{height:44px}.native-mode{display:flex}.native-mode .reader{margin-top:0}}
+:root {
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  color: #18251e;
+  background: #fafbf9;
+  --secondary: #68736c;
+  --accent: #236349;
+  --separator: #e4e8e2;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input { font: inherit; color: inherit; }
+button { border: 0; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+button:active { background: #e5ece5; }
+svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.calculator {
+  max-width: 440px;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: max(env(safe-area-inset-top), 12px) max(env(safe-area-inset-right), 24px) max(env(safe-area-inset-bottom), 12px) max(env(safe-area-inset-left), 24px);
+}
+.app-header { display: flex; align-items: center; justify-content: center; min-height: 44px; flex-shrink: 0; }
+.app-header h1 { margin: 0; font-size: 17px; line-height: 22px; font-weight: 600; letter-spacing: -.3px; }
+.reader { flex: 1; min-height: min-content; display: flex; flex-direction: column; justify-content: flex-start; padding-top: clamp(24px, 4dvh, 40px); gap: 28px; }
+.results { display: grid; grid-template-columns: repeat(var(--currency-count, 3), minmax(0, 1fr)); gap: 12px; }
+.result-cell { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.currency-label { width: 100%; min-height: 44px; padding: 0; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 3px; background: transparent; text-align: center; }
+.currency-identity { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.result-code { font-size: 13px; font-weight: 500; letter-spacing: .1px; color: var(--secondary); }
+.result-name { display: none; }
+.currency-label svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--secondary); }
+.results output { display: block; width: 100%; overflow: hidden; white-space: nowrap; font-size: 24px; font-weight: 500; line-height: 1.2; letter-spacing: -.5px; text-align: center; font-variant-numeric: tabular-nums; }
+.amount { flex-shrink: 0; background: transparent; padding: 0; }
+.amount-entry { display: grid; grid-template-columns: 54px minmax(0, 1fr); align-items: center; min-height: 64px; }
+.amount label { display: flex; flex-direction: column; gap: 3px; font-size: 15px; line-height: 18px; font-weight: 600; }
+.amount-unit { font-size: 12px; line-height: 15px; font-weight: 400; color: var(--secondary); }
+#amt { width: 100%; min-width: 0; padding: 0; border: 0; outline: 0; background: transparent; font-size: 56px; line-height: 64px; font-weight: 500; letter-spacing: -1.6px; text-align: right; font-variant-numeric: tabular-nums; }
+#amt::placeholder { color: inherit; opacity: 1; }
+.amount button { display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0; border-radius: 9px; font-size: 13px; font-weight: 500; background: transparent; color: var(--accent); }
+.amount button:active { background: #dfe7de; }
+.amount-tools { display: grid; grid-template-columns: minmax(0, 1fr) 44px 44px; align-items: center; min-height: 44px; }
+#full { margin-right: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left; color: var(--secondary); font-size: 15px; line-height: 20px; font-variant-numeric: tabular-nums; }
+#full.error { color: #ae352c; }
+.keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 16px; border-top: 1px solid var(--separator); padding-top: 12px; flex-shrink: 0; }
+.keypad button { height: clamp(44px, 8.4dvh, 72px); display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 12px; background: transparent; font-size: 32px; line-height: 1; font-weight: 400; font-variant-numeric: tabular-nums; }
+.keypad button:active { background: #e7ede5; }
+.keypad [data-key="Backspace"] { color: var(--accent); }
+.rate-note { flex-shrink: 0; color: var(--secondary); text-align: center; font-size: 11px; line-height: 14px; }
+.rate-note a { color: inherit; text-underline-offset: 2px; }
+.native-mode .keypad { display: none; }
+.calculator.native-mode { height: var(--keyboard-height, 100dvh); gap: 8px; }
+.native-mode .app-header { display: none; }
+.native-mode .reader { padding-top: 0; justify-content: flex-start; flex: 0; gap: 12px; }
+.native-mode .results { min-height: 0; }
+.native-mode .result-cell { min-height: 0; }
+.native-mode .result-name { display: none; }
+.native-mode .results output { font-size: 22px; }
+.native-mode .amount-entry { min-height: 48px; }
+.native-mode #amt { font-size: 40px; line-height: 48px; }
+.native-mode .amount { padding: 0; }
+.native-mode .rate-note { margin-top: auto; }
+.choosing-currencies .keypad { visibility: hidden; }
+/* A standard phone sheet: navigation actions stay with the title. */
+dialog {
+  position: fixed;
+  top: var(--visual-top, 0px);
+  bottom: calc(100dvh - var(--visual-top, 0px) - var(--visual-height, 100dvh));
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 440px;
+  height: min(560px, calc(var(--visual-height, 100dvh) - max(env(safe-area-inset-top), 12px)));
+  max-height: none;
+  margin: auto auto 0;
+  padding: 8px 20px max(env(safe-area-inset-bottom), 16px);
+  border: 0;
+  border-radius: 26px 26px 0 0;
+  color: #18251e;
+  background: #fafbf9;
+  overflow: hidden;
+}
+dialog::backdrop { background: #14231a55; }
+dialog form { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+.dialog-heading { display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; flex-shrink: 0; }
+.dialog-heading h2 { margin: 0; font-size: 17px; font-weight: 600; text-align: center; }
+dialog button { min-height: 44px; padding: 0; border-radius: 8px; color: var(--accent); background: transparent; font-size: 17px; }
+#currency-cancel { text-align: left; }
+#currency-save { text-align: right; font-weight: 600; }
+#currency-save:disabled { opacity: .4; cursor: default; }
+.picker-summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--secondary); font-size: 13px; line-height: 18px; flex-shrink: 0; }
+#currency-hint { margin: 0; }
+#currency-count { white-space: nowrap; }
+#currency-search { width: 100%; min-height: 44px; padding: 10px 12px; flex-shrink: 0; border: 0; border-radius: 10px; background: #edf0eb; color: #18251e; font-size: 17px; }
+.currency-options { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.currency-options label { display: grid; grid-template-columns: 24px 44px minmax(0, 1fr); gap: 8px; align-items: center; min-height: 52px; padding: 8px 0; font-size: 16px; cursor: pointer; }
+.currency-options label[hidden] { display: none; }
+.currency-options input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
+.currency-options label:has(input:disabled) { opacity: .45; cursor: default; }
+.currency-code { font-weight: 600; font-size: 15px; }
+@media(max-height:680px) {
+  .calculator { gap: 4px; padding-top: max(env(safe-area-inset-top), 12px); padding-bottom: max(env(safe-area-inset-bottom), 12px); padding-left: max(env(safe-area-inset-left), 16px); padding-right: max(env(safe-area-inset-right), 16px); }
+  .app-header { display: none; }
+  .reader { gap: 20px; }
+  .results { gap: 8px; }
+  .result-cell { gap: 2px; }
+  .result-code { font-size: 12px; }
 
-/* The iOS keyboard changes the visual viewport without consistently changing dvh. */
-.calculator.native-mode{height:var(--keyboard-height,100dvh);min-height:0;gap:6px}.native-mode .reader{margin-top:0}.native-mode footer{margin-top:auto}.native-mode .amount{padding-top:2px;padding-bottom:2px}.native-mode #amt{font-size:32px}
+  .results output { font-size: 21px; }
+      .amount { padding: 0; }
+  #amt { font-size: 44px; line-height: 56px; letter-spacing: -1px; }
+  .amount-entry { min-height: 56px; }
+  .keypad { gap: 4px 12px; padding-top: 8px; }
+  .keypad button { height: 44px; font-size: 29px; }
+}
+@media(max-height:460px) and (orientation:landscape) {
+  .calculator { max-width:760px; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:1fr auto; gap:8px 24px; }
+  .reader { grid-column:1; grid-row:1; gap:8px; }
+  .results { min-height:0; }
+  .result-cell { min-height:0; }
+  .rate-note { grid-column:1; grid-row:2; }
+  .keypad { grid-column:2; grid-row:1/3; align-self:center; border-top:0; padding-top:0; }
+  .calculator.native-mode { display:flex; }
+}
 
-.results[data-count="1"] output{font-size:36px}.results[data-count="2"] output{font-size:32px}
-.choosing-currencies .keypad{visibility:hidden}
-dialog{width:calc(100% - 32px);max-width:408px;height:560px;max-height:calc(var(--visual-height,100dvh) - max(env(safe-area-inset-top),16px) - max(env(safe-area-inset-bottom),16px));margin:auto;padding:16px;border:0;border-radius:20px;background:#f5f6f2;color:#183b32;overflow:hidden}
-dialog::backdrop{background:#183b3266}
-dialog form{height:100%;min-height:0;display:flex;flex-direction:column;gap:10px}
-.dialog-heading,.dialog-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
-.dialog-heading h2{font-size:20px;font-weight:650;margin:0}
-dialog button{min-height:44px;min-width:64px;border-radius:12px;padding:8px 12px;background:transparent;font-size:14px}
-#currency-hint{margin:0;color:#64796c;font-size:13px}
-#currency-search{width:100%;min-height:44px;flex-shrink:0;border:1px solid #ced9c9;border-radius:12px;background:#fff;padding:10px 12px;font-size:16px}
-.currency-options{min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain}
-.currency-options label{display:grid;grid-template-columns:24px 40px minmax(0,1fr);gap:8px;align-items:center;min-height:48px;padding:8px 4px;font-size:14px;cursor:pointer}
-.currency-options label[hidden]{display:none}
-.currency-options input{width:20px;height:20px;margin:0;accent-color:#183b32}
-.currency-options label:has(input:disabled){opacity:.5;cursor:default}
-.currency-code{font-weight:650;font-size:13px}
-.dialog-actions{font-size:13px;color:#64796c}
-#currency-save{background:#183b32;color:#fff}
-#currency-save:disabled{opacity:.4;cursor:default}
-/* Compact phones retain their bottom safe area with 1, 2, or 3 result columns. */
-@media(max-height:680px){.calculator{gap:4px}.reader{margin-top:4px}.amount{padding-top:0;padding-bottom:0}#amt{font-size:28px}.spacer{min-height:4px}.results[data-count="1"] output{font-size:28px}.results[data-count="2"] output{font-size:26px}}
+@media(max-height:360px){.native-mode .rate-note{display:none}}

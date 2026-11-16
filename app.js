@@ -55,14 +55,26 @@ function buildResults() {
     button.className = 'currency-label';
     button.setAttribute('aria-label', 'Choose currencies, ' + code + ' — ' + currencyName(code));
     button.setAttribute('aria-haspopup', 'dialog');
-    button.textContent = code;
-    const chevron = document.createElement('span');
-    chevron.textContent = '⌄';
+    const identity = document.createElement('span');
+    identity.className = 'currency-identity';
+    const codeLabel = document.createElement('span');
+    codeLabel.className = 'result-code';
+    codeLabel.textContent = code;
+    const nameLabel = document.createElement('span');
+    nameLabel.className = 'result-name';
+    nameLabel.textContent = currencyName(code);
+    identity.append(codeLabel, nameLabel);
+    const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    chevron.setAttribute('viewBox', '0 0 16 16');
     chevron.setAttribute('aria-hidden', 'true');
-    button.append(chevron);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'm5 6 3 3 3-3');
+    chevron.append(path);
+    button.append(identity, chevron);
     button.addEventListener('click', openCurrencies);
     const output = document.createElement('output');
     output.id = code.toLowerCase();
+    column.className = 'result-cell';
     column.append(button, output);
     results.append(column);
   }
@@ -81,7 +93,7 @@ function render() {
   $('full').classList.toggle('error', !!invalid);
   const state = !navigator.onLine ? ' · Offline' : failed ? ' · Saved data' : rates.source === 'bootstrap' ? ' · Built-in estimate' : '';
   const date = new Intl.DateTimeFormat('sv-SE', {year: 'numeric', month: '2-digit', day: '2-digit'}).format(rates.dataTime);
-  $('rate-status').textContent = 'Daily rates · ' + date + state + (Date.now() - rates.dataTime > 48 * 3600000 ? ' · Old data' : '') + ' · Excludes fees';
+  $('rate-status').textContent = 'Daily rates · ' + date + state + (Date.now() - rates.dataTime > 48 * 3600000 ? ' · Old data' : '');
   $('rate-source').textContent = rates.source === 'fawaz' ? 'Rates by currency-api' : 'Rates By Exchange Rate API';
   $('rate-source').href = rates.source === 'fawaz' ? 'https://github.com/fawazahmed0/exchange-api' : 'https://www.exchangerate-api.com';
   fitResults();
@@ -100,6 +112,7 @@ function sizeViewport() {
   if (!window.visualViewport) return;
   if (!input.readOnly) main.style.setProperty('--keyboard-height', window.visualViewport.height + 'px');
   dialog.style.setProperty('--visual-height', window.visualViewport.height + 'px');
+  dialog.style.setProperty('--visual-top', window.visualViewport.offsetTop + 'px');
 }
 window.visualViewport?.addEventListener('resize', sizeViewport);
 new ResizeObserver(fitResults).observe($('results'));
