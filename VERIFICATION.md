@@ -1,79 +1,68 @@
 # Verification record
 
-Date: **2026-11-16**. App-shell version: **`rupiah-pocket-v2-20261116`**.
+Date: **2026-11-16**. Current app-shell version: **`rupiah-pocket-v3-20261116-r1`**.
 
-## Automated checks
+## Version 3: English interface and selectable currencies
 
-- `node test-amount.mjs`: all 15 amount-parser and keypad checks passed.
-- `node --check app.js`, `amount.js`, and `sw.js`: syntax checks passed.
+The interface, currency picker, accessibility labels, page title, and PWA metadata are in English. Users can select **one, two, or three currencies**; USD, TWD, and MYR remain defaults. Preferences and the full available rate dataset are stored on the device.
 
-## Browser layouts and interaction
+### Automated checks
 
-Chromium and local macOS Safari were tested using exact iframe CSS viewports of **390 × 844**, **393 × 852**, and **320 × 568**. Each layout fit without vertical scrolling, showed all three conversion results, and kept the reading area separate from the lower keypad.
+- `node test-amount.mjs`: all 15 existing amount-parser and keypad checks passed.
+- `node test-rates.mjs`: 28 checks passed for primary/fallback normalization, additional currencies, invalid data, preference limits, previous-cache migration, and refresh deadlines.
+- Syntax checks passed for `app.js`, `amount.js`, `rates.js`, and `sw.js`.
 
-Each size was also stress-tested with simulated **59 px top / 34 px bottom safe-area padding**. All keypad buttons remained within the available area. CSS button height is at least 44 px; Chromium's page-zoom measurements showed a floating-point difference of less than 0.01 px.
+### Layout and interaction
 
-The tested flows included:
+Chromium and macOS Safari passed the **390 × 844**, **393 × 852**, and **320 × 568** CSS viewports with **1, 2, and 3 currencies**, both normally and with simulated **59 px top / 34 px bottom safe-area padding**. All combinations fit without vertical scrolling or invading the bottom safe area. Main controls remain at least 44 CSS pixels high (Chromium's zoom measurements can differ by less than 0.02 px).
 
-- `175.5` → Rp175,500; duplicate decimal prevention, backspace, and clear.
-- `150K` and `十五萬` → Rp150,000, without multiplying an explicit unit twice.
-- Native-keyboard mode hides the app keypad; completing entry restores read-only input and the app keypad.
-- A simulated **320 × 280** visible viewport still shows the results and amount input.
-- macOS Safari dynamic viewport sequence **390 × 844 → 390 × 724 → 390 × 620 → 390 × 844**, without scrolling or losing the bottom keypad margin.
+The following flows passed in both browsers:
 
-## Rates and recovery
+- Currency search by English name/code, selected currencies remaining visible during search, and current choices appearing first.
+- Saving 1–3 choices, preventing a fourth selection, preventing an empty saved selection, and Cancel leaving preferences unchanged.
+- Preferences surviving app reopening.
+- Custom-currency conversions, JPY's zero decimal places, and large values staying visible without truncation.
+- Optional phone-keyboard mode hiding the app keypad and restoring it on completion.
+- A **320 × 280** visible viewport keeping the amount input accessible; the currency dialog fitting that reduced height and hiding the underlying app keypad during search.
+- Primary-provider failure selecting the fallback for custom currencies.
+- Both providers failing while an existing three-currency saved dataset remains usable after migration, with English saved/stale status.
+- Fresh startup/foreground/connectivity checks avoiding duplicate requests and expired data triggering a refresh. Foreground visibility is explicitly simulated in the event test; an OS-background Safari window correctly suppresses a visibility-only refresh until the document is visible.
 
-A fixed primary-provider fixture verified the conversion formulas: **175,500 IDR → USD 10.97 / TWD 351.00 / MYR 52.65**.
+Fixed fixtures verified **175,500 IDR → EUR 9.87 / JPY 1,645**, and **50,000 IDR → EUR 2.81 / GBP 2.50** for the primary fixture. These fixture values test calculation behavior and are not live exchange-rate quotes.
 
-Tests confirmed that primary-provider failure selects the fallback provider and updates attribution. When both sources fail, the last successful rates remain usable and the saved/stale-data status appears.
+### Offline use and actual previous-version upgrade
 
-In macOS Safari, fresh rates caused **zero** requests when foreground and connectivity-restored events were dispatched. Expired rates caused **one** refresh on foreground return, followed by no duplicate request on a subsequent connectivity event.
+Both Chromium and macOS Safari completed these checks:
 
-## Offline reopening and app updates
+1. Save the full rate dataset and a custom EUR/GBP preference.
+2. Disable network responses for the isolated app source, destroy its iframe, and reopen it.
+3. Confirm saved preferences, EUR/GBP conversion, English offline status, and changing to JPY entirely offline.
+4. Reopen again and confirm the offline currency choice persists.
 
-Both Chromium and Safari completed these checks:
+For the update test, the server initially served the **actual previous v2 source**, including its Chinese interface and three-currency cache format. After a controlled v2 page contained `50`, the server switched to v3 and the worker updated. Both browsers automatically loaded the English version, retained `50`, migrated the saved rates, downloaded the expanded dataset, cached the new `rates.js` module, and removed the old v2 cache.
 
-1. Load successfully and wait for service-worker control.
-2. Make every network GET to the isolated test-app source fail.
-3. Destroy and recreate the app iframe.
-4. Confirm the cached app reopens, calculates with the last saved rates, and displays offline status.
+The entire test server was then stopped. In both browsers, the upgraded v3 app still reopened and calculated EUR/GBP offline with the new preferences. This verifies the new module is included in the offline shell; no reinstall was used in this test.
 
-Both browsers also completed a worker-upgrade test: enter `50` in a controlled v1 test shell, serve v2, update the worker, and confirm automatic reload into v2, preservation of `50`, and removal of old app caches.
-
-## Manifest and production checks
-
-- Manifest uses `standalone`, with relative `start_url` and `scope`.
-- Actual icon dimensions: **192 × 192**, **512 × 512**, and an **180 × 180** Apple touch icon.
-- Production URL **https://rupiah-pocket.pages.dev/** opened successfully and returned HTTP 200.
-- Production HTML, CSS, both JavaScript modules, service worker, manifest, and three icons all returned HTTP 200 and matched the reviewed local source byte-for-byte.
-- Manifest MIME type was correct; `sw.js` returned `Cache-Control: no-cache`.
-- The primary rate endpoint allowed CORS with `*`. The production UI fetched the **2026-11-16** daily dataset: `175.5` displayed Rp175,500, USD 9.63 / TWD 317.06 / MYR 39.37.
-- The live site was also opened and used in macOS Safari: `50` displayed Rp50,000 and all three conversions.
-- GitHub pushes to `main` triggered successful Cloudflare Pages production deployments. The verified source commit `86890ac93ca59415dc450841b5673503d5b25347` deployed as `cd928092-bbb5-4795-ac9f-0e5c41d4de81`.
-
-The source repository was initially private and was subsequently made public at the owner's request. The source and its three existing commits were reviewed for credential patterns before that change; no API keys, OAuth tokens, or private keys were found. No credentials are needed by the app.
-
-## Physical iPhone verification — owner-reported
+## Physical iPhone verification — owner-reported, previous v2 release
 
 **Date:** 2026-11-16. **Result:** Passed for offline reopening and currency conversion in the installed Home Screen app at **https://rupiah-pocket.pages.dev/**.
 
-The owner reported completing the following steps on a physical iPhone:
+The owner reported enabling Airplane Mode, turning off Wi-Fi, closing the installed app, reopening it from the Home Screen, and confirming that currency conversion still worked normally while offline.
 
-1. Enable Airplane Mode.
-2. Turn off Wi-Fi.
-3. Close the installed app and reopen it from the Home Screen.
-4. Confirm that currency conversion still works normally while offline.
+This is a physical-device result reported by the owner, rather than an assistant-observed test or desktop simulation. The iPhone model and iOS version were not recorded. It confirms offline reopening and conversion in **the previous v2 release**; it does not establish a physical-device pass for v3's currency picker, English interface, or upgrade path.
 
-This is a real-device result reported by the owner, rather than an assistant-observed test or desktop simulation. The iPhone model and iOS version were not recorded. The report confirms that the installed app can reopen and calculate without connectivity; it does not independently verify the exact saved-rate values or offline status text.
+## Production and installation
 
-## Method and remaining limits
+The production URL is **https://rupiah-pocket.pages.dev/**. The public GitHub repository is connected to Cloudflare Pages; pushes to `main` deploy automatically. Production checks compare deployed app assets against the reviewed source and check the manifest, icons, service-worker headers, and live rate endpoint.
 
-The isolated browser tests used the same app source with only the rate URLs redirected to local fixtures and worker-version markers added for the upgrade scenario. The offline test actually disabled responses from the test source and separately simulated `navigator.onLine=false` to verify its status message. Test injections were not published to production.
+The manifest retains the same app ID, start URL, and scope. Its display name and language are now English. Actual icon dimensions remain **192 × 192**, **512 × 512**, and **180 × 180** for the Apple touch icon. Updating an existing app normally requires an online launch/foreground visit, rather than removing its Home Screen icon.
 
-The owner-reported iPhone test above supplements the assistant's macOS Safari and Chromium checks. Actual iOS toolbar and gesture-bar behavior, native keyboard presentation, long-term storage retention, rate refresh after reconnection, and app upgrades on a physical iPhone have not been established by that report. Desktop safe-area and viewport simulations remain separate from physical-device verification.
+## Test method and remaining limits
 
-The README retains a repeatable offline checklist, including saved-result comparison and restoration of connectivity, for future device checks.
+Isolated browser tests use the app source with rate URLs redirected to local fixtures and `navigator.onLine` simulated for offline status. The upgrade test serves the previous and current source trees at the same origin. Offline reopening is checked with network responses unavailable; the post-upgrade check stops the entire local test server. These test injections are not published to production.
+
+**The assistant has not performed physical iPhone testing of v3.** Actual iOS toolbar/gesture-bar behavior, native keyboard presentation, long-term storage retention, rate refresh after reconnecting, and app upgrades on a physical iPhone still need device confirmation. Desktop safe-area and viewport checks remain simulations, separate from the owner's v2 report.
 
 ## Operating profile
 
-Static Cloudflare Pages deployment, no backend functions, paid exchange-rate API, or AI model. Core app resources and icons total approximately **28 KB uncompressed**. The documentation screenshot is not precached by the app. Normal refresh checks avoid repeated requests within an hour and respect the primary provider's next-update time.
+Static Cloudflare Pages deployment with no backend functions, paid exchange-rate API, or AI model. The complete supported currency dataset is fetched in one request per due refresh, with no request for each key press or currency selection. Failed refreshes retain saved data, and an older fallback dataset does not replace a newer saved dataset. The documentation screenshot is not precached by the app.

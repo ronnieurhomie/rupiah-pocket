@@ -1,1 +1,8 @@
-{"name":"rupiah-pocket","private":true,"type":"module","scripts":{"test":"node test-amount.mjs"}}
+{
+  "name": "rupiah-pocket",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test-amount.mjs && node test-rates.mjs"
+  }
+}

@@ -1,5 +1,5 @@
-const VERSION='rupiah-pocket-v2-20261116';
-const ASSETS=['./','./index.html','./styles.css','./app.js','./amount.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
+const VERSION='rupiah-pocket-v3-20261116-r1';
+const ASSETS=['./','./index.html','./styles.css','./app.js','./amount.js','./rates.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(VERSION).then(c=>c.addAll(ASSETS.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('rupiah-pocket-')&&k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{

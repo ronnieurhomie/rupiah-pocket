@@ -1,20 +1,21 @@
 # Rupiah Pocket
 
-A small, offline-capable currency converter for travelers in Indonesia. Enter an Indonesian rupiah price and see **USD, TWD, and MYR together**, with an iPhone-friendly keypad and a Home Screen app experience.
+A small, offline-capable currency converter for travelers in Indonesia. Enter an Indonesian rupiah price and see **one, two, or three currencies of your choice**, with an iPhone-friendly keypad and a Home Screen app experience.
 
 **[Open the app](https://rupiah-pocket.pages.dev/)** · [Verification notes](VERIFICATION.md)
 
-The app's display name is **印尼盾快算** and its interface is in Traditional Chinese. This repository's documentation is in English.
+The app, currency picker, accessibility labels, installation metadata, and project documentation are in **English**.
 
 ## Why it exists
 
-Rupiah prices involve a lot of zeros. Checking a menu, taxi fare, or shop price should take a few thumb taps, without switching between three currency pairs or reopening a chat. Rupiah Pocket treats an ordinary entry as **thousands of IDR**, keeps all three conversions visible, and remains useful when mobile data is unavailable.
+Rupiah prices involve a lot of zeros. Checking a menu, taxi fare, or shop price should take a few thumb taps, without switching between currency pairs or reopening a chat. Rupiah Pocket treats an ordinary entry as **thousands of IDR**, keeps your selected conversions visible, and remains useful when mobile data is unavailable.
 
 It runs independently as a static website and installable Progressive Web App (PWA). It requires no ChatGPT login, Lovable account, API key, backend, paid model, or build step.
 
 ## What it does
 
-- Converts IDR into USD, TWD, and MYR simultaneously.
+- Converts IDR into **1–3 currencies you choose**; USD, TWD, and MYR are simply the initial defaults.
+- Provides a searchable currency picker with English names and codes, and remembers your choices on the device.
 - Opens with its own numeric keypad, including decimal, backspace, and clear controls.
 - Supports an optional native phone keyboard through an explicit button tap.
 - Uses the latest available **daily reference rates**, with a secondary provider if the primary request fails.
@@ -33,7 +34,15 @@ These are reference conversions, not bank quotes or executable exchange prices. 
 | `150K` | Rp150,000 | Explicit units are not multiplied again |
 | `十五萬` | Rp150,000 | Chinese amount units are also recognized |
 
-The built-in keypad is available immediately. Tap the keyboard icon in the amount panel to use the phone keyboard; tap **Done** (shown as `完成`) to return to the app keypad. Native keyboard opening depends on a user gesture in iOS Safari; the app does not rely on `autofocus`.
+The built-in keypad is available immediately. Tap the keyboard icon in the amount panel to use the phone keyboard; tap **Done** to return to the app keypad. Native keyboard opening depends on a user gesture in iOS Safari; the app does not rely on `autofocus`.
+
+## Choose your currencies
+
+Tap any currency code above a result to open **Currencies**. Your current selections appear first and remain visible while searching. Uncheck a currency to free a slot, search by code or English name (for example `EUR`, `yen`, or `British Pound`), select **one to three**, then tap **Done**. **Cancel** discards changes, and the picker prevents saving an empty selection or adding a fourth currency.
+
+One or two selected currencies receive more space and larger result text. Your choices are stored locally and survive closing, reopening, and app updates. The app downloads the provider's full supported rate dataset in one request, so changing currencies makes no extra network request and works offline after that dataset is saved. A first-time or older offline installation may initially have only the three built-in/previously saved currencies; connect once to load the expanded dataset.
+
+Currency precision follows the selected currency (for example, JPY has no fractional digits). Very large results use scientific notation when necessary to avoid truncating the amount. If a selected currency is absent from the saved dataset, its result is shown as a dash rather than calculated from an invented rate.
 
 ## Install on iPhone
 
@@ -61,8 +70,7 @@ The primary endpoint is [ExchangeRate-API Open Access](https://open.er-api.com/v
 
 ```text
 USD per IDR = 1 / rates.IDR
-TWD per IDR = rates.TWD / rates.IDR
-MYR per IDR = rates.MYR / rates.IDR
+any other currency per IDR = rates[currency] / rates.IDR
 converted amount = IDR amount × per-IDR rate
 ```
 
@@ -74,7 +82,7 @@ https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/idr.
 
 The fallback already supplies rates per IDR. The displayed attribution follows the selected provider; the primary provider's required [Rates By Exchange Rate API](https://www.exchangerate-api.com) link is retained.
 
-Successful rates are saved in `localStorage`. Refresh checks run on startup, return to the foreground, and restored connectivity. Requests are normally limited to once per hour and respect the primary provider's announced next-update time. The date shown in the app comes from the provider's dataset, displayed in the device's local time, rather than from the time the page was opened.
+The full successful rate dataset is saved in `localStorage`, separately from currency preferences. Refresh checks run on startup, return to the foreground, and restored connectivity. For the primary provider, its announced next-update deadline determines when a new request is due; providers without that deadline are checked at most hourly. A fallback dataset older than the saved dataset does not replace newer saved rates. The date shown in the app comes from the provider's dataset, displayed in the device's local time, rather than from the time the page was opened.
 
 If both providers fail, the last successful rates remain available. Before any successful rate download, an included reference snapshot provides an initial estimate and is identified as saved data, with a stale warning when applicable. Each provider request has an eight-second timeout.
 
@@ -84,7 +92,7 @@ The reading area and keypad are positioned separately: the three results sit abo
 
 CSS uses safe-area insets and `svh`/`dvh`; native-keyboard mode also uses `visualViewport.height` so the app keypad can be hidden and the available reading area can adapt.
 
-`sw.js` precaches the HTML, styles, JavaScript modules, manifest, and icons. Both navigation and modules are served from the same installed shell version. Rate API responses are not stored in that service-worker cache; validated rates are stored separately in `localStorage`.
+`sw.js` precaches the HTML, styles, JavaScript modules (including `rates.js`), manifest, and icons. Both navigation and modules are served from the same installed shell version. Rate API responses are not stored in that service-worker cache; validated rates are stored separately in `localStorage`.
 
 When cached app assets change, increment `VERSION` in `sw.js`. A successfully installed new worker activates immediately, removes previous app caches, and reloads an already controlled page once. The amount is temporarily retained in `sessionStorage` across that upgrade reload. The service-worker response uses `Cache-Control: no-cache` to support update checks.
 
@@ -93,14 +101,16 @@ When cached app assets change, increment `VERSION` in `sw.js`. A successfully in
 ```text
 index.html               App interface and PWA metadata
 styles.css               Responsive layout, safe areas, and keypad styling
-app.js                   Conversion UI, rate fetching/storage, and updates
+app.js                   English UI, currency picker, fetching/storage, updates
+rates.js                 Provider normalization, preferences, cache migration
 amount.js                Amount parsing and keypad behavior
 sw.js                    Versioned offline app-shell cache
 manifest.webmanifest     Installable PWA configuration
 icons/                   Home Screen and PWA icons
-docs/iphone-layout.jpg   Captured production layout; not a physical-device photo
+docs/iphone-layout.jpg   Desktop capture of the English phone layout
 _headers                 Cloudflare Pages response headers
 test-amount.mjs           Amount and keypad checks
+test-rates.mjs            Provider, preference, migration, and freshness checks
 VERIFICATION.md          Completed checks and remaining device-test limits
 ```
 
@@ -112,7 +122,9 @@ The production app has no external JavaScript dependencies. Node is needed only 
 git clone https://github.com/ronnieurhomie/rupiah-pocket.git
 cd rupiah-pocket
 node test-amount.mjs
+node test-rates.mjs
 node --check app.js
+node --check rates.js
 node --check amount.js
 node --check sw.js
 python3 -m http.server 4173
@@ -133,20 +145,26 @@ The public GitHub repository is the source of truth. **Cloudflare Pages** serves
 | Build output directory | `.` |
 | Root directory | Default repository root |
 
-The GitHub and Cloudflare Pages setup uses free services and the provided `pages.dev` subdomain. There is no custom domain, server function, paid API, or recurring service purchased for this project. The core app assets and icons total approximately 28 KB before compression; the documentation screenshot is not part of the offline app shell.
+The GitHub and Cloudflare Pages setup uses free services and the provided `pages.dev` subdomain. There is no custom domain, server function, paid API, or recurring service purchased for this project. The core app assets and icons remain a small static download; the documentation screenshot is not part of the offline app shell.
 
 Official deployment references: [Cloudflare Git integration](https://developers.cloudflare.com/pages/get-started/git-integration/) and [static HTML deployment](https://developers.cloudflare.com/pages/framework-guides/deploy-anything/).
+
+## Do installed iPhone apps update automatically?
+
+**Normally, yes; deleting and reinstalling is unnecessary.** A push to `main` first needs a successful Cloudflare Pages deployment. The installed app then checks for a new service worker when opened online or brought back to the foreground. Once the complete new shell is installed, it activates and the page reloads once, retaining the current amount. While offline, the installed version continues working until it can download an update.
+
+Code changes to cached assets must include a new `VERSION` in `sw.js`; changing GitHub alone without deploying an updated worker can leave an installed shell on its previous version. Version 3 migrates the previous three-currency saved rates, preserving offline conversion while the expanded dataset is fetched online. Currency preferences are retained in the same origin's local storage.
 
 ## Privacy and verification
 
 Entered prices and saved rates stay in the browser. The app has no account system, analytics, telemetry, voice recognition, or AI integration. Online rate requests go directly from the browser to the exchange-rate providers, and static files are served by Cloudflare Pages.
 
-Amount/keypad checks, the requested phone-size layouts, desktop Safari/Chromium interactions, offline reopening, and service-worker upgrades have been verified.
+Amount/keypad and rate/preference tests, all 1–3 currency layouts at the requested phone sizes, desktop Safari/Chromium interactions, offline reopening, and the actual v2-to-v3 service-worker upgrade have been verified.
 
-**Physical iPhone offline test passed — owner-reported on 2026-11-16.** The owner enabled Airplane Mode, turned off Wi-Fi, closed the installed Home Screen app, and reopened it. Currency conversion continued to work offline. This result confirms offline reopening and conversion on the owner's iPhone; other device-specific checks remain separate. See [VERIFICATION.md](VERIFICATION.md) for the test scope and remaining limits.
+**Physical iPhone offline test passed — owner-reported on 2026-11-16.** The owner enabled Airplane Mode, turned off Wi-Fi, closed the installed Home Screen app, and reopened it. Currency conversion continued to work offline. This result confirms offline reopening and conversion on the owner's iPhone in the previous v2 release. The new English interface and currency-picker release has been tested on desktop Safari and Chromium, but has not yet received a physical iPhone test. See [VERIFICATION.md](VERIFICATION.md) for the test scope and remaining limits.
 
 <details>
-<summary>Production layout capture</summary>
+<summary>English interface layout capture</summary>
 
 ![Rupiah Pocket at a 390 × 844 CSS-pixel viewport](docs/iphone-layout.jpg)
 
