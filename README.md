@@ -2,6 +2,8 @@
 
 適合 iPhone 旅行使用的純前端 PWA：IDR 同時換算 USD／TWD／MYR，不需帳號、API key、後端、npm build 或付費服務。
 
+正式網址：https://rupiah-pocket.pages.dev
+
 ## 使用
 
 - 預設單位為千印尼盾：`50` → Rp50,000；`175.5` → Rp175,500。
