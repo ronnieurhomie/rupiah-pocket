@@ -1,34 +1,66 @@
-# 驗證紀錄
+# Verification record
 
-日期：2026-11-16。版本：`rupiah-pocket-v2-20261116`。
+Date: **2026-11-16**. App-shell version: **`rupiah-pocket-v2-20261116`**.
 
-## 已通過
+## Automated checks
 
-- `node test-amount.mjs`：15 項金額解析／按鍵檢查。
-- `node --check app.js`、`amount.js`、`sw.js`：語法正確。
-- Chromium 與本機 macOS Safari：精確 iframe CSS viewport `390×844`、`393×852`、`320×568`；不需垂直捲動，三種結果同時可見，閱讀區與下半部鍵盤分開。
-- 以上尺寸另外注入頂部 59px／底部 34px 安全區進行壓力測試，按鍵仍在可用區內。CSS 按鍵最小高度 44px；Chromium 頁面縮放量測有小於 0.01px 的浮點誤差。
-- App 按鍵：175.5 → Rp175,500，小數點去重、退格、清除；150K／十五萬 → Rp150,000。
-- 手機鍵盤切換會隱藏 App 鍵盤，完成後恢復唯讀輸入與 App 鍵盤。模擬 `320×280` 可視高度仍可見全部結果與輸入。
-- 固定匯率資料驗證主來源公式：175,500 IDR → USD10.97／TWD351.00／MYR52.65。
-- 主來源故障時使用備援並切換 attribution；兩來源皆失敗時使用最後成功匯率，顯示「已存資料／資料較舊」。
-- Chromium 與 Safari 均完成：首次載入成功及 service worker 接管後，讓隔離測試來源的所有網路 GET 失敗，再銷毀／重建 App iframe；離線重開仍可使用已存匯率換算，顯示離線狀態。
-- Chromium 與 Safari 均完成：已開啟的 v1 測試 shell 輸入 50，伺服器改提供 v2、更新 service worker 後，自動重新載入 v2、保留 50，舊版本快取移除。
-- macOS Safari 動態 viewport 390×844 → 390×724 → 390×620 → 390×844 均不捲動；新鮮匯率收到前景／連線事件時 0 次請求，過期後前景事件更新 1 次，隨後連線事件不重複請求。
-- manifest：standalone、相對 start_url／scope；圖示實際尺寸 192×192、512×512，Apple touch icon 180×180。
+- `node test-amount.mjs`: all 15 amount-parser and keypad checks passed.
+- `node --check app.js`, `amount.js`, and `sw.js`: syntax checks passed.
 
-## 測試方法與限制
+## Browser layouts and interaction
 
-隔離測試使用相同 App 原始碼，僅將匯率 URL 改到本機固定資料，以及為 service worker 升級注入測試版本標記。離線測試實際關閉測試來源的網路回應，另模擬 `navigator.onLine=false` 檢查離線提示。這些測試注入均未發布到正式網站。
+Chromium and local macOS Safari were tested using exact iframe CSS viewports of **390 × 844**, **393 × 852**, and **320 × 568**. Each layout fit without vertical scrolling, showed all three conversion results, and kept the reading area separate from the lower keypad.
 
-**沒有實體 iPhone 測試。** 已測試 macOS Safari；安全區、PWA 尺寸及系統鍵盤占用以桌面瀏覽器模擬。iOS Safari 工具列展開／收合、實際手勢條、安裝後 standalone 與實際原生鍵盤彈出仍需在 iPhone 確認，不能視為已實機通過。
+Each size was also stress-tested with simulated **59 px top / 34 px bottom safe-area padding**. All keypad buttons remained within the available area. CSS button height is at least 44 px; Chromium's page-zoom measurements showed a floating-point difference of less than 0.01 px.
 
-## 部署
+The tested flows included:
 
-GitHub 儲存庫：`ronnieurhomie/rupiah-pocket`，已確認為 **private**。
-Cloudflare Pages：`rupiah-pocket`，已設定 GitHub `main` 自動部署、`exit 0`、根目錄靜態輸出；無後端、付費 API 或自訂網域。
-正式網址：https://rupiah-pocket.pages.dev 。已實際開啟、HTTP 200。首次 Git push 自動部署成功（commit `4bde3c8`，deployment `79a6fefa-0d37-431c-9f9b-99d88d11b405`）。
+- `175.5` → Rp175,500; duplicate decimal prevention, backspace, and clear.
+- `150K` and `十五萬` → Rp150,000, without multiplying an explicit unit twice.
+- Native-keyboard mode hides the app keypad; completing entry restores read-only input and the app keypad.
+- A simulated **320 × 280** visible viewport still shows the results and amount input.
+- macOS Safari dynamic viewport sequence **390 × 844 → 390 × 724 → 390 × 620 → 390 × 844**, without scrolling or losing the bottom keypad margin.
 
-正式站 `index.html`、CSS、兩個 JS 模組、`sw.js`、manifest 及三個圖示全部 HTTP 200，與本機來源逐 byte 相同。manifest MIME 正確；`sw.js` 回應 `Cache-Control: no-cache`。主來源的 CORS 為 `*`，正式畫面取得 2026-11-16 的資料；175.5 顯示 Rp175,500、USD9.63／TWD317.06／MYR39.37。
+## Rates and recovery
 
-程式資源與圖示合計約 28KB（未壓縮），靜態託管，無伺服器運算費或付費模型。
+A fixed primary-provider fixture verified the conversion formulas: **175,500 IDR → USD 10.97 / TWD 351.00 / MYR 52.65**.
+
+Tests confirmed that primary-provider failure selects the fallback provider and updates attribution. When both sources fail, the last successful rates remain usable and the saved/stale-data status appears.
+
+In macOS Safari, fresh rates caused **zero** requests when foreground and connectivity-restored events were dispatched. Expired rates caused **one** refresh on foreground return, followed by no duplicate request on a subsequent connectivity event.
+
+## Offline reopening and app updates
+
+Both Chromium and Safari completed these checks:
+
+1. Load successfully and wait for service-worker control.
+2. Make every network GET to the isolated test-app source fail.
+3. Destroy and recreate the app iframe.
+4. Confirm the cached app reopens, calculates with the last saved rates, and displays offline status.
+
+Both browsers also completed a worker-upgrade test: enter `50` in a controlled v1 test shell, serve v2, update the worker, and confirm automatic reload into v2, preservation of `50`, and removal of old app caches.
+
+## Manifest and production checks
+
+- Manifest uses `standalone`, with relative `start_url` and `scope`.
+- Actual icon dimensions: **192 × 192**, **512 × 512**, and an **180 × 180** Apple touch icon.
+- Production URL **https://rupiah-pocket.pages.dev/** opened successfully and returned HTTP 200.
+- Production HTML, CSS, both JavaScript modules, service worker, manifest, and three icons all returned HTTP 200 and matched the reviewed local source byte-for-byte.
+- Manifest MIME type was correct; `sw.js` returned `Cache-Control: no-cache`.
+- The primary rate endpoint allowed CORS with `*`. The production UI fetched the **2026-11-16** daily dataset: `175.5` displayed Rp175,500, USD 9.63 / TWD 317.06 / MYR 39.37.
+- The live site was also opened and used in macOS Safari: `50` displayed Rp50,000 and all three conversions.
+- GitHub pushes to `main` triggered successful Cloudflare Pages production deployments. The verified source commit `86890ac93ca59415dc450841b5673503d5b25347` deployed as `cd928092-bbb5-4795-ac9f-0e5c41d4de81`.
+
+The source repository was initially private and was subsequently made public at the owner's request. The source and its three existing commits were reviewed for credential patterns before that change; no API keys, OAuth tokens, or private keys were found. No credentials are needed by the app.
+
+## Method and limits
+
+The isolated browser tests used the same app source with only the rate URLs redirected to local fixtures and worker-version markers added for the upgrade scenario. The offline test actually disabled responses from the test source and separately simulated `navigator.onLine=false` to verify its status message. Test injections were not published to production.
+
+**No physical iPhone testing was performed by the maintainer's assistant.** macOS Safari was tested, but iOS browser-toolbar behavior, actual gesture-bar insets, installed standalone mode, native keyboard presentation, and OS storage retention still require an iPhone check. Desktop safe-area and viewport simulations do not constitute physical-device verification.
+
+For the owner's device check, launch the installed Home Screen app online first, record a calculation and source date, enable Airplane Mode with Wi-Fi off, close and reopen the app, and repeat the calculation. Restore connectivity afterward. The README contains the full checklist.
+
+## Operating profile
+
+Static Cloudflare Pages deployment, no backend functions, paid exchange-rate API, or AI model. Core app resources and icons total approximately **28 KB uncompressed**. The documentation screenshot is not precached by the app. Normal refresh checks avoid repeated requests within an hour and respect the primary provider's next-update time.
