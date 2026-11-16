@@ -92,7 +92,7 @@ The reading area and keypad are positioned separately: the three results sit abo
 
 CSS uses safe-area insets and `svh`/`dvh`; native-keyboard mode also uses `visualViewport.height` so the app keypad can be hidden and the available reading area can adapt.
 
-`sw.js` precaches the HTML, styles, JavaScript modules (including `rates.js`), manifest, and icons. Both navigation and modules are served from the same installed shell version. Rate API responses are not stored in that service-worker cache; validated rates are stored separately in `localStorage`.
+`sw.js` precaches the HTML, styles, JavaScript modules (including `rates.js`), manifest, and icons. Navigation uses the cached canonical `./` document, because Cloudflare Pages redirects `index.html` to `/` and browsers can reject a redirected response served by a worker. Modules and the document are still served from the same installed shell version. Rate API responses are not stored in that service-worker cache; validated rates are stored separately in `localStorage`.
 
 When cached app assets change, increment `VERSION` in `sw.js`. A successfully installed new worker activates immediately, removes previous app caches, and reloads an already controlled page once. The amount is temporarily retained in `sessionStorage` across that upgrade reload. The service-worker response uses `Cache-Control: no-cache` to support update checks.
 

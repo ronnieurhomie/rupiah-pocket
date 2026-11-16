@@ -1,6 +1,6 @@
 # Verification record
 
-Date: **2026-11-16**. Current app-shell version: **`rupiah-pocket-v3-20261116-r1`**.
+Date: **2026-11-16**. Current app-shell version: **`rupiah-pocket-v3-20261116-r2`**.
 
 ## Version 3: English interface and selectable currencies
 
@@ -42,6 +42,10 @@ Both Chromium and macOS Safari completed these checks:
 For the update test, the server initially served the **actual previous v2 source**, including its Chinese interface and three-currency cache format. After a controlled v2 page contained `50`, the server switched to v3 and the worker updated. Both browsers automatically loaded the English version, retained `50`, migrated the saved rates, downloaded the expanded dataset, cached the new `rates.js` module, and removed the old v2 cache.
 
 The entire test server was then stopped. In both browsers, the upgraded v3 app still reopened and calculated EUR/GBP offline with the new preferences. This verifies the new module is included in the offline shell; no reinstall was used in this test.
+
+### Cloudflare clean-URL regression
+
+Production Safari exposed a navigation failure because Cloudflare Pages redirects `index.html` to `/`. The worker now precaches and returns the canonical `./` document, and does not precache the redirecting `index.html` URL. Chromium and Safari both passed a regression test with a local server reproducing that 308 redirect: the cached document was not redirected, and the app cold-reopened and converted EUR/GBP after the entire server was stopped.
 
 ## Physical iPhone verification — owner-reported, previous v2 release
 
