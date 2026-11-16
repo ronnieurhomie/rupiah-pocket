@@ -14,6 +14,7 @@
 - 主來源故障時使用備援並切換 attribution；兩來源皆失敗時使用最後成功匯率，顯示「已存資料／資料較舊」。
 - Chromium 與 Safari 均完成：首次載入成功及 service worker 接管後，讓隔離測試來源的所有網路 GET 失敗，再銷毀／重建 App iframe；離線重開仍可使用已存匯率換算，顯示離線狀態。
 - Chromium 與 Safari 均完成：已開啟的 v1 測試 shell 輸入 50，伺服器改提供 v2、更新 service worker 後，自動重新載入 v2、保留 50，舊版本快取移除。
+- macOS Safari 動態 viewport 390×844 → 390×724 → 390×620 → 390×844 均不捲動；新鮮匯率收到前景／連線事件時 0 次請求，過期後前景事件更新 1 次，隨後連線事件不重複請求。
 - manifest：standalone、相對 start_url／scope；圖示實際尺寸 192×192、512×512，Apple touch icon 180×180。
 
 ## 測試方法與限制
@@ -26,4 +27,8 @@
 
 GitHub 儲存庫：`ronnieurhomie/rupiah-pocket`，已確認為 **private**。
 Cloudflare Pages：`rupiah-pocket`，已設定 GitHub `main` 自動部署、`exit 0`、根目錄靜態輸出；無後端、付費 API 或自訂網域。
-正式網址：https://rupiah-pocket.pages.dev 。正式部署狀態與資源檢查於部署完成後補記。
+正式網址：https://rupiah-pocket.pages.dev 。已實際開啟、HTTP 200。首次 Git push 自動部署成功（commit `4bde3c8`，deployment `79a6fefa-0d37-431c-9f9b-99d88d11b405`）。
+
+正式站 `index.html`、CSS、兩個 JS 模組、`sw.js`、manifest 及三個圖示全部 HTTP 200，與本機來源逐 byte 相同。manifest MIME 正確；`sw.js` 回應 `Cache-Control: no-cache`。主來源的 CORS 為 `*`，正式畫面取得 2026-11-16 的資料；175.5 顯示 Rp175,500、USD9.63／TWD317.06／MYR39.37。
+
+程式資源與圖示合計約 28KB（未壓縮），靜態託管，無伺服器運算費或付費模型。
